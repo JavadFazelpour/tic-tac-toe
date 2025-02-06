@@ -1,2 +1,1 @@
-# tic-tac-toe
-Odin Project Tic Tac Toe game
+# Tic Tac Toe
