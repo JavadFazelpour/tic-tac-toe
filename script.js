@@ -98,3 +98,40 @@ class ConsoleView {
     console.log(`Winner is ${turn.name} with ${turn.mark} mark`);
   }
 }
+/*
++++++++++++++++
+|  Controller |
++++++++++++++++
+*/
+
+function gameController(rows, columns, playerOneName, playerTwoName) {
+  let gameOver = false;
+  const gameBoard = createGameBoard(rows, columns);
+  const playerX = new Player(playerOneName, "X");
+  const playerO = new Player(playerTwoName, "O");
+  let turn = playerX;
+
+  function takeTurn() {
+    return turn === playerX ? playerO : playerX;
+  }
+
+  function startGame() {
+    do {
+      ConsoleView.printGrid(gameBoard.getGrid());
+      ConsoleView.printMessage(turn);
+      let userInput = ConsoleView.getUserInput();
+      let success = gameBoard.isCellAvailable(userInput[0], userInput[1]);
+      if (success) {
+        gameBoard.setMarkAt(userInput[0], userInput[1], turn.mark);
+        gameOver = gameBoard.checkWinCondition(turn.mark);
+        if (!gameOver) turn = takeTurn();
+      } else {
+        ConsoleView.printErrorMessage();
+      }
+    } while (!gameOver);
+
+    ConsoleView.printGrid(gameBoard.getGrid());
+    ConsoleView.printWinner(turn);
+  }
+  return { startGame };
+}
