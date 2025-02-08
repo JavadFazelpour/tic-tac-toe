@@ -66,3 +66,35 @@ function createGameBoard(rows, columns) {
     checkDrawCondition,
   };
 }
+
+/*
+++++++++++
+|  View  |
+++++++++++
+*/
+class ConsoleView {
+  static printGrid(grid) {
+    grid.forEach((row) => {
+      console.log(row.map((cell) => (cell === null ? "." : cell)).join(" "));
+    });
+  }
+
+  static printMessage(turn) {
+    console.log(`Its ${turn.name}s turn with ${turn.mark}.`);
+  }
+
+  static printErrorMessage() {
+    console.log(`The cell is already marked please choose another cell.`);
+  }
+
+  static getUserInput() {
+    let userInput = prompt(
+      `To mark a cell, please enter row and column numbers separated by comma for example: 2,1`
+    );
+    return userInput.split(",");
+  }
+
+  static printWinner(turn) {
+    console.log(`Winner is ${turn.name} with ${turn.mark} mark`);
+  }
+}
