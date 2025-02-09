@@ -126,6 +126,51 @@ class ConsoleView extends AbstractView {
     console.log(`Winner is ${turn.name} with ${turn.mark} mark`);
   }
 }
+
+class DOMView extends AbstractView {
+  displayGrid(grid) {
+    for (let i = 0; i < 3; i++) {
+      for (let j = 0; j < 3; j++) {
+        const cellId = `r${i}c${j}`;
+        const cell = document.getElementById(cellId);
+        cell.textContent = grid[i][j] || "";
+      }
+    }
+  }
+
+  displayMessage(turn) {
+    const message = document.querySelector(".message");
+    message.textContent = `${turn.mark.toUpperCase()} TURN`;
+  }
+
+  displayErrorMessage() {
+    const message = document.querySelector(".message");
+    message.textContent = `\nThe cell is already marked please choose another cell.`;
+  }
+
+  getUserInput() {
+    return new Promise((resolve) => {
+      for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 3; j++) {
+          const cellId = `r${i}c${j}`;
+          const cell = document.getElementById(cellId);
+          cell.addEventListener("click", (event) => {
+            const row = parseInt(event.target.dataset.row);
+            const col = parseInt(event.target.dataset.col);
+            resolve([row, col]);
+          });
+        }
+      }
+    });
+  }
+
+  displayWinner(turn) {
+    const message = document.querySelector(".message");
+    message.textContent = `${
+      turn.name
+    } with ${turn.mark.toUpperCase()} mark Wins the Game`;
+  }
+}
 /*
 +++++++++++++++
 |  Controller |
@@ -151,22 +196,38 @@ class GameController {
     return this.turn === this.playerX ? this.playerO : this.playerX;
   }
 
-  startGame() {
-    do {
+  async startGame() {
+    while (!this.gameOver) {
       this.view.displayGrid(this.gameBoard.getGrid());
       this.view.displayMessage(this.turn);
-      let userInput = this.view.getUserInput();
-      let success = this.gameBoard.isCellAvailable(userInput[0], userInput[1]);
-      if (success) {
-        this.gameBoard.setMarkAt(userInput[0], userInput[1], this.turn.mark);
-        this.gameOver = this.gameBoard.checkWinCondition(this.turn.mark);
-        if (!this.gameOver) this.turn = this.takeTurn();
-      } else {
-        this.view.displayErrorMessage();
+
+      try {
+        let userInput = await this.view.getUserInput();
+
+        let row = parseInt(userInput[0]);
+        let col = parseInt(userInput[1]);
+
+        let success = this.gameBoard.isCellAvailable(row, col);
+
+        if (success) {
+          this.gameBoard.setMarkAt(row, col, this.turn.mark);
+          this.gameOver = this.gameBoard.checkWinCondition(this.turn.mark);
+
+          if (!this.gameOver) {
+            this.turn = this.takeTurn();
+          }
+        } else {
+          this.view.displayErrorMessage();
+        }
+      } catch (error) {
+        console.error("Error getting user input:", error);
       }
-    } while (!this.gameOver);
+    }
 
     this.view.displayGrid(this.gameBoard.getGrid());
     this.view.displayWinner(this.turn);
   }
 }
+
+const cont = new GameController(3, 3, "A", "Z", new DOMView());
+cont.startGame();
