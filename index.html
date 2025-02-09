@@ -7,6 +7,39 @@
     <title>Tic Toc Toe</title>
   </head>
   <body>
+    <div class="flex-container">
+      <header><h1>Tic Toc Toe</h1></header>
+      <div class="message">X Turn</div>
+      <main>
+        <div id="r0c0" class="tile"></div>
+        <div id="r0c1" class="tile"></div>
+        <div id="r0c2" class="tile"></div>
+        <div id="r1c0" class="tile"></div>
+        <div id="r1c1" class="tile"></div>
+        <div id="r1c2" class="tile"></div>
+        <div id="r2c0" class="tile"></div>
+        <div id="r2c1" class="tile"></div>
+        <div id="r2c2" class="tile"></div>
+      </main>
+      <div class="result">
+        <div class="card" id="playerX-card">
+          <h2>PLAYER X</h2>
+          <p id="x-score">0</p>
+        </div>
+        <div class="card" id="tie-card">
+          <h2>TIES</h2>
+          <p id="tie-score">0</p>
+        </div>
+        <div class="card" id="playerO-card">
+          <h2>PLAYER O</h2>
+          <p id="o-score">0</p>
+        </div>
+      </div>
+      <footer>
+        &copy;
+        <a href="https://github.com/JavadFazelpour/tic-tac-toe">javad-fp</a>
+      </footer>
+    </div>
     <script src="script.js"></script>
   </body>
 </html>
