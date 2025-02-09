@@ -72,29 +72,57 @@ function createGameBoard(rows, columns) {
 |  View  |
 ++++++++++
 */
-class ConsoleView {
-  static printGrid(grid) {
+
+class AbstractView {
+  constructor() {
+    if (new.target === AbstractView) {
+      throw new TypeError("Cannot construct AbstractView instances directly");
+    }
+  }
+
+  displayGrid(grid) {
+    throw new Error("Method 'displayGrid' must be implemented");
+  }
+
+  displayMessage(turn) {
+    throw new Error("Method 'displayMessage' must be implemented");
+  }
+
+  displayErrorMessage() {
+    throw new Error("Method 'displayErrorMessage' must be implemented");
+  }
+
+  getUserInput() {
+    throw new Error("Method 'getUserInput' must be implemented");
+  }
+
+  displayWinner(turn) {
+    throw new Error("Method 'displayWinner' must be implemented");
+  }
+}
+class ConsoleView extends AbstractView {
+  displayGrid(grid) {
     grid.forEach((row) => {
       console.log(row.map((cell) => (cell === null ? "." : cell)).join(" "));
     });
   }
 
-  static printMessage(turn) {
+  displayMessage(turn) {
     console.log(`Its ${turn.name}s turn with ${turn.mark}.`);
   }
 
-  static printErrorMessage() {
+  displayErrorMessage() {
     console.log(`The cell is already marked please choose another cell.`);
   }
 
-  static getUserInput() {
+  getUserInput() {
     let userInput = prompt(
       `To mark a cell, please enter row and column numbers separated by comma for example: 2,1`
     );
     return userInput.split(",");
   }
 
-  static printWinner(turn) {
+  displayWinner(turn) {
     console.log(`Winner is ${turn.name} with ${turn.mark} mark`);
   }
 }
@@ -104,34 +132,41 @@ class ConsoleView {
 +++++++++++++++
 */
 
-function gameController(rows, columns, playerOneName, playerTwoName) {
-  let gameOver = false;
-  const gameBoard = createGameBoard(rows, columns);
-  const playerX = new Player(playerOneName, "X");
-  const playerO = new Player(playerTwoName, "O");
-  let turn = playerX;
+class GameController {
+  constructor(rows, columns, playerOneName, playerTwoName, view) {
+    if (!(view instanceof AbstractView)) {
+      throw new Error("View must inherit from AbstractView");
+    }
+    this.view = view;
 
-  function takeTurn() {
-    return turn === playerX ? playerO : playerX;
+    this.gameBoard = createGameBoard(rows, columns);
+    this.playerX = new Player(playerOneName, "X");
+    this.playerO = new Player(playerTwoName, "O");
+
+    this.gameOver = false;
+    this.turn = this.playerX;
   }
 
-  function startGame() {
+  takeTurn() {
+    return this.turn === this.playerX ? this.playerO : this.playerX;
+  }
+
+  startGame() {
     do {
-      ConsoleView.printGrid(gameBoard.getGrid());
-      ConsoleView.printMessage(turn);
-      let userInput = ConsoleView.getUserInput();
-      let success = gameBoard.isCellAvailable(userInput[0], userInput[1]);
+      this.view.displayGrid(this.gameBoard.getGrid());
+      this.view.displayMessage(this.turn);
+      let userInput = this.view.getUserInput();
+      let success = this.gameBoard.isCellAvailable(userInput[0], userInput[1]);
       if (success) {
-        gameBoard.setMarkAt(userInput[0], userInput[1], turn.mark);
-        gameOver = gameBoard.checkWinCondition(turn.mark);
-        if (!gameOver) turn = takeTurn();
+        this.gameBoard.setMarkAt(userInput[0], userInput[1], this.turn.mark);
+        this.gameOver = this.gameBoard.checkWinCondition(this.turn.mark);
+        if (!this.gameOver) this.turn = this.takeTurn();
       } else {
-        ConsoleView.printErrorMessage();
+        this.view.displayErrorMessage();
       }
-    } while (!gameOver);
+    } while (!this.gameOver);
 
-    ConsoleView.printGrid(gameBoard.getGrid());
-    ConsoleView.printWinner(turn);
+    this.view.displayGrid(this.gameBoard.getGrid());
+    this.view.displayWinner(this.turn);
   }
-  return { startGame };
 }
